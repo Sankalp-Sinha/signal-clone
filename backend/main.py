@@ -4,7 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import engine
 from models import Base
 from routers import conversations, messages, auth
+from seed import seed_database
 Base.metadata.create_all(bind=engine)
+seed_database()
 
 app = FastAPI(title="Signal Clone API")
 
