@@ -1,3 +1,7 @@
+## Live Repository
+
+GitHub: https://github.com/<your-username>/signal-clone
+
 # Signal Clone
 
 A full-stack real-time messaging application inspired by Signal Messenger, built using Next.js, FastAPI, SQLite, SQLAlchemy, and WebSockets.
