@@ -10,6 +10,7 @@ import {
   sendMessage,
   createDirectConversation,
   markConversationRead,
+  WS_URL,
 } from "@/lib/api";
 
 export default function Home() {
