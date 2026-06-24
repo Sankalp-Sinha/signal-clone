@@ -1,6 +1,10 @@
-## Live Repository
+## Links
 
-GitHub: https://github.com/<your-username>/signal-clone
+GitHub Repository: https://github.com/Sankalp-Sinha/signal-clone
+
+Frontend Deployment: https://signal-clone-7hc2251ps-sankalps-projects-714dd915.vercel.app
+
+Backend Deployment: https://signal-clone-nzop.onrender.com
 
 # Signal Clone
 
