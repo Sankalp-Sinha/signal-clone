@@ -6,7 +6,11 @@ export type Conversation = {
   unread_count: number;
 };
 
-const API_URL = "http://localhost:8000";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+export const WS_URL =
+  process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
 
 export async function getConversations(userId: number): Promise<Conversation[]> {
   const response = await fetch(`${API_URL}/conversations/?user_id=${userId}`);

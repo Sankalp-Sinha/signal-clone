@@ -77,7 +77,7 @@ export default function Home() {
 
     if (socketRef.current) socketRef.current.close();
 
-    const ws = new WebSocket(`ws://localhost:8000/ws/${conversation.id}`);
+    const ws = new WebSocket(`${WS_URL}/ws/${conversation.id}`);
 
     ws.onopen = () => console.log("WebSocket connected");
 
