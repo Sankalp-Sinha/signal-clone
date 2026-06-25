@@ -14,6 +14,8 @@ import {
   GroupMember,
   getGroupMembers,
   WS_URL,
+  addGroupMember,
+  removeGroupMember,
 } from "@/lib/api";
 
 export default function Home() {
@@ -197,6 +199,46 @@ export default function Home() {
     } catch {
       alert("Failed to create group");
     }
+  }
+
+  async function handleAddMember() {
+    if (!selectedConversation) return;
+
+    const username = prompt("Enter username to add");
+
+    if (!username) return;
+
+    const result = await addGroupMember(selectedConversation.id, username);
+
+    if ("error" in result) {
+      alert(result.error);
+      return;
+    }
+
+    const members = await getGroupMembers(selectedConversation.id);
+    setGroupMembers(members);
+
+    alert("Member added successfully");
+  }
+
+  async function handleRemoveMember(userId: number) {
+    if (!selectedConversation) return;
+
+    const confirmRemove = confirm("Remove this member from group?");
+
+    if (!confirmRemove) return;
+
+    const result = await removeGroupMember(selectedConversation.id, userId);
+
+    if ("error" in result) {
+      alert(result.error);
+      return;
+    }
+
+    const members = await getGroupMembers(selectedConversation.id);
+    setGroupMembers(members);
+
+    alert("Member removed successfully");
   }
 
   return (
@@ -482,17 +524,31 @@ export default function Home() {
                     {member.role === "admin" ? "Admin" : "Member"}
                   </p>
                 </div>
+
+                {member.role !== "admin" && (
+                  <button
+                    onClick={() => handleRemoveMember(member.id)}
+                    className="rounded-full bg-red-50 px-3 py-1 text-xs text-red-600"
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
             ))}
           </div>
 
           <div className="mt-6 space-y-2">
-            <button className="w-full rounded-lg bg-blue-500 py-2 text-sm text-white">
+            <button
+              onClick={handleAddMember}
+              className="w-full rounded-lg bg-blue-500 py-2 text-sm text-white"
+            >
               Add member
             </button>
+
             <button className="w-full rounded-lg bg-gray-100 py-2 text-sm text-gray-700">
               Rename group
             </button>
+
             <button className="w-full rounded-lg bg-red-50 py-2 text-sm text-red-600">
               Leave group
             </button>

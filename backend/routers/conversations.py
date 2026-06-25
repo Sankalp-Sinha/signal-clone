@@ -299,3 +299,67 @@ def get_conversation_members(
         }
         for member, user in members
     ]
+
+
+@router.delete("/{conversation_id}/members/{user_id}")
+def remove_group_member(
+    conversation_id: int,
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+
+    if not conversation or conversation.type != "group":
+        return {"error": "Group not found"}
+
+    member = (
+        db.query(ConversationMember)
+        .filter(
+            ConversationMember.conversation_id == conversation_id,
+            ConversationMember.user_id == user_id
+        )
+        .first()
+    )
+
+    if not member:
+        return {"error": "Member not found"}
+
+    if member.role == "admin":
+        return {"error": "Admin cannot be removed"}
+
+    db.delete(member)
+    db.commit()
+
+    return {"success": True}
+
+
+@router.delete("/{conversation_id}/members/{user_id}")
+def remove_group_member(
+    conversation_id: int,
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+
+    if not conversation or conversation.type != "group":
+        return {"error": "Group not found"}
+
+    member = (
+        db.query(ConversationMember)
+        .filter(
+            ConversationMember.conversation_id == conversation_id,
+            ConversationMember.user_id == user_id
+        )
+        .first()
+    )
+
+    if not member:
+        return {"error": "Member not found"}
+
+    if member.role == "admin":
+        return {"error": "Admin cannot be removed"}
+
+    db.delete(member)
+    db.commit()
+
+    return {"success": True}

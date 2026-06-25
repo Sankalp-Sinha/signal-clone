@@ -210,3 +210,43 @@ export async function getGroupMembers(
 
   return response.json();
 }
+
+export async function addGroupMember(
+  conversationId: number,
+  username: string
+) {
+  const response = await fetch(
+    `${API_URL}/conversations/${conversationId}/members`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to add member");
+  }
+
+  return response.json();
+}
+
+export async function removeGroupMember(
+  conversationId: number,
+  userId: number
+) {
+  const response = await fetch(
+    `${API_URL}/conversations/${conversationId}/members/${userId}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to remove member");
+  }
+
+  return response.json();
+}
