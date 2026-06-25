@@ -69,6 +69,12 @@ export default function Home() {
 
     const data = await getMessages(conversation.id);
     setMessages(data);
+    if (conversation.type === "group") {
+      const members = await getGroupMembers(conversation.id);
+      setGroupMembers(members);
+    } else {
+      setGroupMembers([]);
+    }
 
     if (currentUser) {
       await markConversationRead(
@@ -331,7 +337,7 @@ export default function Home() {
                   <h2 className="font-semibold">{selectedConversation.name}</h2>
                   <p className="text-xs text-green-600">
                     {selectedConversation.type === "group"
-                      ? "Group • 4 members"
+                      ? `Group • ${groupMembers.length || "?"} members`
                       : "Online"}
                   </p>
                 </div>
@@ -456,7 +462,9 @@ export default function Home() {
               {selectedConversation.name[0]}
             </div>
             <h4 className="mt-3 font-semibold">{selectedConversation.name}</h4>
-            <p className="text-sm text-gray-500">4 members</p>
+            <p className="text-sm text-gray-500">
+              {groupMembers.length} members
+            </p>
           </div>
 
           <div className="mt-6">
