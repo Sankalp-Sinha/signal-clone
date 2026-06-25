@@ -295,10 +295,10 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-4 flex gap-2 text-sm">
+          <div className="mt-4 flex justify-between gap-3 text-sm">
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className={`rounded-full bg-gray-200 px-4 py-2 text-sm ${darkMode ? "text-black" : "text-gray-700"
+              className={`flex-1 rounded-full bg-gray-200 py-2 text-center text-sm ${darkMode ? "text-black" : "text-gray-700"
                 }`}
             >
               {darkMode ? "Light" : "Dark"}
@@ -306,7 +306,7 @@ export default function Home() {
 
             <button
               onClick={() => (window.location.href = "/settings")}
-              className={`rounded-full bg-gray-200 px-4 py-2 text-sm ${darkMode ? "text-black" : "text-gray-700"
+              className={`flex-1 rounded-full bg-gray-200 py-2 text-center text-sm ${darkMode ? "text-black" : "text-gray-700"
                 }`}
             >
               Settings
@@ -314,7 +314,7 @@ export default function Home() {
 
             <button
               onClick={handleLogout}
-              className="rounded-full bg-red-500 px-4 py-2 text-sm text-white"
+              className="flex-1 rounded-full bg-red-500 py-2 text-center text-sm text-white"
             >
               Logout
             </button>
