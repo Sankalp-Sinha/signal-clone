@@ -9,7 +9,10 @@ import {
   getMessages,
   sendMessage,
   createDirectConversation,
+  createGroupConversation,
   markConversationRead,
+  GroupMember,
+  getGroupMembers,
   WS_URL,
 } from "@/lib/api";
 
@@ -24,6 +27,7 @@ export default function Home() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [darkMode, setDarkMode] = useState(false);
+  const [groupMembers, setGroupMembers] = useState<GroupMember[]>([]);
 
   const socketRef = useRef<WebSocket | null>(null);
 
@@ -155,6 +159,40 @@ export default function Home() {
     }
   }
 
+  async function handleCreateGroup() {
+    if (!currentUser) return;
+
+    const groupName = prompt("Enter group name");
+
+    if (!groupName) return;
+
+    const membersInput = prompt(
+      "Enter member usernames separated by comma, example: alice,bob"
+    );
+
+    const memberUsernames = membersInput
+      ? membersInput
+        .split(",")
+        .map((name) => name.trim())
+        .filter(Boolean)
+      : [];
+
+    try {
+      await createGroupConversation(
+        currentUser.id,
+        groupName,
+        memberUsernames
+      );
+
+      const updatedConversations = await getConversations(currentUser.id);
+      setConversations(updatedConversations);
+
+      alert("Group created successfully");
+    } catch {
+      alert("Failed to create group");
+    }
+  }
+
   return (
     <main
       className={`flex h-screen ${darkMode
@@ -168,50 +206,51 @@ export default function Home() {
           : "border-gray-200 bg-white"
           }`}
       >
-        <div
-          className={`flex items-center justify-between border-b px-5 py-4 ${darkMode
-            ? "border-gray-700"
-            : "border-gray-200"
-            }`}
-        >
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleNewChat}
-              className="rounded-full bg-blue-500 px-3 py-1 text-sm text-white"
-            >
-              +
-            </button>
+        <div className="border-b border-gray-200 p-5">
+          <h1 className="text-4xl font-bold text-blue-500">Signal</h1>
 
-            <div>
-              <h1 className="text-xl font-semibold">Signal</h1>
-              {currentUser && (
-                <p className="text-xs text-gray-500">
-                  Logged in as {currentUser.display_name}
-                </p>
-              )}
-            </div>
-          </div>
+          <p className="mt-1 text-sm text-gray-500">
+            Logged in as <strong>{currentUser?.display_name}</strong>
+          </p>
 
-          <div className="flex gap-2">
+          <div className="mt-4 flex gap-2">
             <button
-              onClick={() => setDarkMode((prev) => !prev)}
-              className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
+              onClick={() => setDarkMode(!darkMode)}
+              className={`rounded-full bg-gray-200 px-4 py-2 text-sm ${darkMode ? "text-black" : "text-gray-700"
+                }`}
             >
               {darkMode ? "Light" : "Dark"}
             </button>
 
             <button
               onClick={() => (window.location.href = "/settings")}
-              className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
+              className={`rounded-full bg-gray-200 px-4 py-2 text-sm ${darkMode ? "text-black" : "text-gray-700"
+                }`}
             >
               Settings
             </button>
 
             <button
               onClick={handleLogout}
-              className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
+              className="rounded-full bg-red-500 px-4 py-2 text-sm text-white"
             >
               Logout
+            </button>
+          </div>
+
+          <div className="mt-4 flex gap-2">
+            <button
+              onClick={handleNewChat}
+              className="flex-1 rounded-full bg-blue-500 py-2 text-white"
+            >
+              + New Chat
+            </button>
+
+            <button
+              onClick={handleCreateGroup}
+              className="flex-1 rounded-full bg-green-500 py-2 text-white"
+            >
+              + New Group
             </button>
           </div>
         </div>
@@ -300,7 +339,14 @@ export default function Home() {
 
               {selectedConversation.type === "group" && (
                 <button
-                  onClick={() => setShowGroupInfo((prev) => !prev)}
+                  onClick={async () => {
+                    if (!selectedConversation) return;
+
+                    const members = await getGroupMembers(selectedConversation.id);
+                    setGroupMembers(members);
+
+                    setShowGroupInfo((prev) => !prev);
+                  }}
                   className="rounded-full border px-3 py-1 text-sm text-gray-600"
                 >
                   Group info
@@ -416,15 +462,16 @@ export default function Home() {
           <div className="mt-6">
             <h4 className="mb-3 text-sm font-semibold text-gray-500">Members</h4>
 
-            {["Sankalp", "Alice", "Bob", "Neha"].map((member, index) => (
-              <div key={member} className="flex items-center gap-3 py-2">
+            {groupMembers.map((member) => (
+              <div key={member.id} className="flex items-center gap-3 py-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 font-medium text-gray-600">
-                  {member[0]}
+                  {member.display_name[0]}
                 </div>
+
                 <div className="flex-1">
-                  <p className="text-sm font-medium">{member}</p>
+                  <p className="text-sm font-medium">{member.display_name}</p>
                   <p className="text-xs text-gray-400">
-                    {index === 0 ? "Admin" : "Member"}
+                    {member.role === "admin" ? "Admin" : "Member"}
                   </p>
                 </div>
               </div>

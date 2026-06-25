@@ -22,6 +22,14 @@ class DirectConversationCreate(BaseModel):
     current_user_id: int
     target_username: str
 
+class GroupConversationCreate(BaseModel):
+    current_user_id: int
+    name: str
+    member_usernames: list[str]
+
+
+class GroupMemberAdd(BaseModel):
+    username: str
 
 @router.get("/")
 def get_conversations(user_id: int, db: Session = Depends(get_db)):
@@ -179,3 +187,115 @@ def mark_conversation_read(
         db.commit()
 
     return {"success": True}
+
+
+@router.post("/group")
+def create_group_conversation(
+    payload: GroupConversationCreate,
+    db: Session = Depends(get_db)
+):
+    conversation = Conversation(
+        type="group",
+        name=payload.name,
+        avatar_url=f"https://api.dicebear.com/7.x/initials/svg?seed={payload.name}"
+    )
+
+    db.add(conversation)
+    db.commit()
+    db.refresh(conversation)
+
+    admin_member = ConversationMember(
+        conversation_id=conversation.id,
+        user_id=payload.current_user_id,
+        role="admin",
+        unread_count=0
+    )
+
+    db.add(admin_member)
+
+    for username in payload.member_usernames:
+        user = db.query(User).filter(User.username == username).first()
+
+        if user and user.id != payload.current_user_id:
+            member = ConversationMember(
+                conversation_id=conversation.id,
+                user_id=user.id,
+                role="member",
+                unread_count=0
+            )
+            db.add(member)
+
+    db.commit()
+
+    return {
+        "id": conversation.id,
+        "name": conversation.name,
+        "type": conversation.type,
+        "last_message": "",
+        "unread_count": 0,
+    }
+
+
+@router.post("/{conversation_id}/members")
+def add_group_member(
+    conversation_id: int,
+    payload: GroupMemberAdd,
+    db: Session = Depends(get_db)
+):
+    conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+
+    if not conversation or conversation.type != "group":
+        return {"error": "Group not found"}
+
+    user = db.query(User).filter(User.username == payload.username).first()
+
+    if not user:
+        return {"error": "User not found"}
+
+    existing_member = (
+        db.query(ConversationMember)
+        .filter(
+            ConversationMember.conversation_id == conversation_id,
+            ConversationMember.user_id == user.id
+        )
+        .first()
+    )
+
+    if existing_member:
+        return {"error": "User already in group"}
+
+    member = ConversationMember(
+        conversation_id=conversation_id,
+        user_id=user.id,
+        role="member",
+        unread_count=0
+    )
+
+    db.add(member)
+    db.commit()
+
+    return {"success": True}
+
+    
+@router.get("/{conversation_id}/members")
+def get_conversation_members(
+    conversation_id: int,
+    db: Session = Depends(get_db)
+):
+    members = (
+        db.query(ConversationMember, User)
+        .join(User, ConversationMember.user_id == User.id)
+        .filter(ConversationMember.conversation_id == conversation_id)
+        .all()
+    )
+
+    return [
+        {
+            "id": user.id,
+            "username": user.username,
+            "display_name": user.display_name,
+            "avatar_url": user.avatar_url,
+            "role": member.role,
+        }
+        for member, user in members
+    ]

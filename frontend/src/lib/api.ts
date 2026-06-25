@@ -165,3 +165,48 @@ export async function markConversationRead(
     }
   );
 }
+
+export async function createGroupConversation(
+  currentUserId: number,
+  name: string,
+  memberUsernames: string[]
+): Promise<Conversation> {
+  const response = await fetch(`${API_URL}/conversations/group`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      current_user_id: currentUserId,
+      name,
+      member_usernames: memberUsernames,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create group");
+  }
+
+  return response.json();
+}
+
+
+export type GroupMember = {
+  id: number;
+  username: string;
+  display_name: string;
+  avatar_url: string;
+  role: string;
+};
+
+export async function getGroupMembers(
+  conversationId: number
+): Promise<GroupMember[]> {
+  const response = await fetch(`${API_URL}/conversations/${conversationId}/members`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch group members");
+  }
+
+  return response.json();
+}
