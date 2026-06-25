@@ -15,6 +15,7 @@ import {
   getGroupMembers,
   WS_URL,
   addGroupMember,
+  markMessagesRead,
   removeGroupMember,
 } from "@/lib/api";
 
@@ -48,6 +49,17 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (!selectedConversation) return;
+
+    const interval = setInterval(async () => {
+      const updatedMessages = await getMessages(selectedConversation.id);
+      setMessages(updatedMessages);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [selectedConversation]);
+
+  useEffect(() => {
     if (!currentUser) return;
 
     const interval = setInterval(async () => {
@@ -71,6 +83,13 @@ export default function Home() {
 
     const data = await getMessages(conversation.id);
     setMessages(data);
+
+    if (currentUser) {
+      await markMessagesRead(conversation.id, currentUser.id);
+    }
+
+    const updatedMessages = await getMessages(conversation.id);
+    setMessages(updatedMessages);
     if (conversation.type === "group") {
       const members = await getGroupMembers(conversation.id);
       setGroupMembers(members);
@@ -432,7 +451,16 @@ export default function Home() {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}{" "}
-                        {isMe && "✓✓"}
+                        {isMe && (
+                          <span
+                            className={`ml-1 font-bold ${message.status === "read"
+                              ? "text-yellow-300"
+                              : "text-gray-300"
+                              }`}
+                          >
+                            ✓✓
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

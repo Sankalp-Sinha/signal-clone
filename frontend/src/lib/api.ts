@@ -250,3 +250,21 @@ export async function removeGroupMember(
 
   return response.json();
 }
+
+export async function markMessagesRead(
+  conversationId: number,
+  userId: number
+) {
+  const response = await fetch(
+    `${API_URL}/messages/${conversationId}/read?user_id=${userId}`,
+    {
+      method: "POST",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to mark messages read");
+  }
+
+  return response.json();
+}

@@ -43,7 +43,7 @@ def create_message(payload: MessageCreate, db: Session = Depends(get_db)):
         conversation_id=payload.conversation_id,
         sender_id=payload.sender_id,
         content=payload.content,
-        status="sent",
+        status="delivered",
         is_read=False,
     )
 
@@ -64,3 +64,28 @@ def create_message(payload: MessageCreate, db: Session = Depends(get_db)):
     db.refresh(message)
 
     return message
+
+
+
+@router.post("/{conversation_id}/read")
+def mark_messages_read(
+    conversation_id: int,
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    messages = (
+        db.query(Message)
+        .filter(
+            Message.conversation_id == conversation_id,
+            Message.sender_id != user_id
+        )
+        .all()
+    )
+
+    for message in messages:
+        message.status = "read"
+        message.is_read = True
+
+    db.commit()
+
+    return {"success": True}
