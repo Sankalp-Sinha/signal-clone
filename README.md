@@ -4,6 +4,10 @@ A full-stack clone of the Signal messaging application built using **Next.js**, 
 
 ---
 
+## Demo Video
+https://drive.google.com/file/d/10pUHRqmP8ETPvocj7LoHr8ZMV6PNnQ2W/view?usp=sharing
+
+
 ## Screenshots
 
 | Login |
@@ -17,6 +21,7 @@ A full-stack clone of the Signal messaging application built using **Next.js**, 
 | Group Info |
 |------------|
 | ![](screenshots/group-info.png) |
+
 
 ## Live Demo
 
