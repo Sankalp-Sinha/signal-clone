@@ -276,19 +276,26 @@ export default function Home() {
     >
       <Toaster position="top-right" />
       <aside
-        className={`w-[380px] border-r ${darkMode
+        className={`w-[360px] border-r ${darkMode
           ? "border-gray-700 bg-[#1f2937]"
           : "border-gray-200 bg-white"
           }`}
       >
         <div className="border-b border-gray-200 p-5">
-          <h1 className="text-4xl font-bold text-blue-500">Signal</h1>
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-500 text-lg font-bold text-white">
+              S
+            </div>
 
-          <p className="mt-1 text-sm text-gray-500">
-            Logged in as <strong>{currentUser?.display_name}</strong>
-          </p>
+            <div>
+              <h1 className="text-2xl font-bold">Signal</h1>
+              <p className="text-sm text-gray-500">
+                {currentUser?.display_name}
+              </p>
+            </div>
+          </div>
 
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex gap-2 text-sm">
             <button
               onClick={() => setDarkMode(!darkMode)}
               className={`rounded-full bg-gray-200 px-4 py-2 text-sm ${darkMode ? "text-black" : "text-gray-700"
@@ -313,7 +320,7 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex gap-2 text-sm">
             <button
               onClick={handleNewChat}
               className="flex-1 rounded-full bg-blue-500 py-2 text-white"
@@ -334,7 +341,7 @@ export default function Home() {
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`w-full rounded-full px-4 py-2 text-sm outline-none ${darkMode
+            className={`w-full rounded-full px-4 py-2.5 text-sm outline-none ${darkMode
               ? "bg-[#374151] text-white"
               : "bg-gray-100"
               }`}
@@ -346,7 +353,7 @@ export default function Home() {
           <button
             key={conversation.id}
             onClick={() => openConversation(conversation)}
-            className={`flex w-full items-center gap-3 px-4 py-3 text-left ${darkMode
+            className={`flex w-full items-center gap-3 px-4 py-2 text-left transition-colors ${darkMode
               ? "hover:bg-[#374151]"
               : "hover:bg-gray-100"
               } ${selectedConversation?.id === conversation.id
@@ -356,18 +363,18 @@ export default function Home() {
                 : ""
               }`}
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-600">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-600">
               {conversation.name[0]}
             </div>
 
             <div className="min-w-0 flex-1">
               <div className="flex justify-between">
-                <p className="truncate font-medium">{conversation.name}</p>
-                <span className="text-xs text-gray-400">now</span>
+                <p className="truncate text-[15px] font-semibold">{conversation.name}</p>
+                <span className="text-[11px] text-gray-400">now</span>
               </div>
 
               <p
-                className={`truncate text-sm ${darkMode
+                className={`truncate text-[13px] ${darkMode
                   ? "text-gray-300"
                   : "text-gray-500"
                   }`}
@@ -429,7 +436,7 @@ export default function Home() {
               )}
             </div>
 
-            <div className="flex-1 space-y-3 overflow-y-auto p-6">
+            <div className="flex-1 space-y-2 overflow-y-auto px-7 py-5">
               {messages.map((message) => {
                 const isMe = message.sender_id === currentUser?.id;
 
@@ -439,14 +446,16 @@ export default function Home() {
                     className={`flex ${isMe ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[60%] rounded-2xl px-4 py-2 text-sm ${isMe
-                        ? "bg-blue-500 text-white"
-                        : "bg-white text-gray-900"
+                      className={`max-w-[58%] rounded-[18px] px-4 py-2 text-[14px] shadow-sm ${isMe
+                        ? "bg-[#2C6BED] text-white"
+                        : darkMode
+                          ? "bg-white text-gray-900"
+                          : "bg-[#F1F1F1] text-gray-900"
                         }`}
                     >
                       <p>{message.content}</p>
                       <div
-                        className={`mt-1 text-right text-[10px] ${isMe ? "text-blue-100" : "text-gray-400"
+                        className={`mt-1 text-right text-[11px] ${isMe ? "text-blue-100" : "text-gray-400"
                           }`}
                       >
                         {new Date(message.created_at).toLocaleTimeString([], {
@@ -482,7 +491,7 @@ export default function Home() {
                 : "border-gray-200 bg-white"
                 }`}
             >              <div
-              className={`flex items-center gap-3 rounded-full px-4 py-2 ${darkMode ? "bg-[#374151]" : "bg-gray-100"
+              className={`flex items-center gap-3 rounded-full px-5 py-3 shadow-sm ${darkMode ? "bg-[#2b3443]" : "bg-gray-100"
                 }`}
             >
                 <input
@@ -514,7 +523,7 @@ export default function Home() {
 
                 <button
                   onClick={handleSendMessage}
-                  className="rounded-full bg-blue-500 px-4 py-2 text-sm text-white"
+                  className="rounded-full bg-[#2C6BED] px-5 py-2 text-sm font-medium text-white hover:bg-blue-600"
                 >
                   Send
                 </button>
