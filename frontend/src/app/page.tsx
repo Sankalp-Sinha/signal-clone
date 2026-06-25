@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import {
   Conversation,
   Message,
@@ -175,14 +176,14 @@ export default function Home() {
       );
 
       if ("error" in newConversation) {
-        alert(`User with username "${username}" does not exist`);
+        toast.error(`User with username "${username}" does not exist`);
         return;
       }
 
       const updatedConversations = await getConversations(currentUser.id);
       setConversations(updatedConversations);
     } catch (error) {
-      alert(`User with username "${username}" does not exist`);
+      toast.error(`User with username "${username}" does not exist`);
     }
   }
 
@@ -214,9 +215,9 @@ export default function Home() {
       const updatedConversations = await getConversations(currentUser.id);
       setConversations(updatedConversations);
 
-      alert("Group created successfully");
+      toast.success("Group created successfully");
     } catch {
-      alert("Failed to create group");
+      toast.error("Failed to create group");
     }
   }
 
@@ -230,14 +231,14 @@ export default function Home() {
     const result = await addGroupMember(selectedConversation.id, username);
 
     if ("error" in result) {
-      alert(result.error);
+      toast.error(result.error);
       return;
     }
 
     const members = await getGroupMembers(selectedConversation.id);
     setGroupMembers(members);
 
-    alert("Member added successfully");
+    toast.success("Member added successfully");
   }
 
   async function handleRemoveMember(userId: number) {
@@ -250,14 +251,14 @@ export default function Home() {
     const result = await removeGroupMember(selectedConversation.id, userId);
 
     if ("error" in result) {
-      alert(result.error);
+      toast.error(result.error);
       return;
     }
 
     const members = await getGroupMembers(selectedConversation.id);
     setGroupMembers(members);
 
-    alert("Member removed successfully");
+    toast.success("Member removed successfully");
   }
 
   const currentUserGroupRole = groupMembers.find(
@@ -273,6 +274,7 @@ export default function Home() {
         : "bg-[#f6f6f6] text-black"
         }`}
     >
+      <Toaster position="top-right" />
       <aside
         className={`w-[380px] border-r ${darkMode
           ? "border-gray-700 bg-[#1f2937]"
@@ -530,7 +532,12 @@ export default function Home() {
       </section>
 
       {showGroupInfo && selectedConversation?.type === "group" && (
-        <aside className="w-[320px] border-l border-gray-200 bg-white p-5">
+        <aside
+          className={`w-[320px] border-l p-5 ${darkMode
+            ? "border-gray-700 bg-[#1f2937] text-white"
+            : "border-gray-200 bg-white text-gray-900"
+            }`}
+        >
           <h3 className="text-lg font-semibold">Group info</h3>
 
           <div className="mt-5 flex flex-col items-center">
@@ -538,13 +545,18 @@ export default function Home() {
               {selectedConversation.name[0]}
             </div>
             <h4 className="mt-3 font-semibold">{selectedConversation.name}</h4>
-            <p className="text-sm text-gray-500">
+            <p className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-500"}`}>
               {groupMembers.length} members
             </p>
           </div>
 
           <div className="mt-6">
-            <h4 className="mb-3 text-sm font-semibold text-gray-500">Members</h4>
+            <h4
+              className={`mb-3 text-sm font-semibold ${darkMode ? "text-gray-300" : "text-gray-500"
+                }`}
+            >
+              Members
+            </h4>
 
             {groupMembers.map((member) => (
               <div key={member.id} className="flex items-center gap-3 py-2">
@@ -562,7 +574,8 @@ export default function Home() {
                 {isCurrentUserAdmin && member.role !== "admin" && (
                   <button
                     onClick={() => handleRemoveMember(member.id)}
-                    className="rounded-full bg-red-50 px-3 py-1 text-xs text-red-600"
+                    className={`rounded-full px-3 py-1 text-xs ${darkMode ? "bg-red-900/40 text-red-300" : "bg-red-50 text-red-600"
+                      }`}
                   >
                     Remove
                   </button>
@@ -581,11 +594,17 @@ export default function Home() {
               </button>
             )}
 
-            <button className="w-full rounded-lg bg-gray-100 py-2 text-sm text-gray-700">
+            <button
+              className={`w-full rounded-lg py-2 text-sm ${darkMode ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-700"
+                }`}
+            >
               Rename group
             </button>
 
-            <button className="w-full rounded-lg bg-red-50 py-2 text-sm text-red-600">
+            <button
+              className={`w-full rounded-lg py-2 text-sm ${darkMode ? "bg-red-900/40 text-red-300" : "bg-red-50 text-red-600"
+                }`}
+            >
               Leave group
             </button>
           </div>
