@@ -8,15 +8,21 @@ export default function LoginPage() {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
     try {
+      setLoading(true);
       setError("");
+
       await login(username);
+
       setOtpSent(true);
       alert("Mock OTP is 123456");
     } catch {
       setError("User not found");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -56,13 +62,19 @@ export default function LoginPage() {
           )}
 
           {error && <p className="text-sm text-red-500">{error}</p>}
+          {loading && (
+            <p className="text-center text-sm text-gray-500">
+              Starting backend... This may take up to 30 seconds on the first request.
+            </p>
+          )}
 
           {!otpSent ? (
             <button
               onClick={handleLogin}
-              className="w-full rounded-lg bg-blue-500 py-3 font-medium text-white"
+              disabled={loading}
+              className="w-full rounded-lg bg-blue-500 py-3 font-medium text-white disabled:cursor-not-allowed disabled:bg-blue-300"
             >
-              Send OTP
+              {loading ? "Waking server..." : "Send OTP"}
             </button>
           ) : (
             <button
