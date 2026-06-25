@@ -4,17 +4,31 @@ A full-stack clone of the Signal messaging application built using **Next.js**, 
 
 ---
 
+## Screenshots
+
+| Login |
+|-------|
+| ![](screenshots/login.png) |
+
+| Direct Chat | Group Chat |
+|-------------|------------|
+| ![](screenshots/direct-chat.png) | ![](screenshots/group-chat.png) |
+
+| Group Info |
+|------------|
+| ![](screenshots/group-info.png) |
+
 ## Live Demo
 
-**Frontend:** https://YOUR-VERCEL-URL.vercel.app
+**Frontend:** https://signal-clone-flame.vercel.app/
 
-**Backend:** https://YOUR-RENDER-URL.onrender.com
+**Backend:** https://signal-clone-nzop.onrender.com
 
 ---
 
 ## GitHub Repository
 
-https://github.com/YOUR-USERNAME/signal-clone
+https://github.com/Sankalp-Sinha/signal-clone
 
 ---
 
