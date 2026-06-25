@@ -4,7 +4,7 @@ import { useState } from "react";
 import { login, verifyOtp } from "@/lib/api";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("sankalp");
+  const [username, setUsername] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState("");
