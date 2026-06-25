@@ -241,6 +241,12 @@ export default function Home() {
     alert("Member removed successfully");
   }
 
+  const currentUserGroupRole = groupMembers.find(
+    (member) => member.id === currentUser?.id
+  )?.role;
+
+  const isCurrentUserAdmin = currentUserGroupRole === "admin";
+
   return (
     <main
       className={`flex h-screen ${darkMode
@@ -525,7 +531,7 @@ export default function Home() {
                   </p>
                 </div>
 
-                {member.role !== "admin" && (
+                {isCurrentUserAdmin && member.role !== "admin" && (
                   <button
                     onClick={() => handleRemoveMember(member.id)}
                     className="rounded-full bg-red-50 px-3 py-1 text-xs text-red-600"
@@ -538,12 +544,14 @@ export default function Home() {
           </div>
 
           <div className="mt-6 space-y-2">
-            <button
-              onClick={handleAddMember}
-              className="w-full rounded-lg bg-blue-500 py-2 text-sm text-white"
-            >
-              Add member
-            </button>
+            {isCurrentUserAdmin && (
+              <button
+                onClick={handleAddMember}
+                className="w-full rounded-lg bg-blue-500 py-2 text-sm text-white"
+              >
+                Add member
+              </button>
+            )}
 
             <button className="w-full rounded-lg bg-gray-100 py-2 text-sm text-gray-700">
               Rename group
