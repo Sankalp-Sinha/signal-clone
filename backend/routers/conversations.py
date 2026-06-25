@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from database import SessionLocal
+from datetime import datetime
 from models import Conversation, ConversationMember, Message, User
 
 router = APIRouter(
@@ -16,11 +17,12 @@ def get_db():
         yield db
     finally:
         db.close()
-    
+
 
 class DirectConversationCreate(BaseModel):
     current_user_id: int
     target_username: str
+
 
 class GroupConversationCreate(BaseModel):
     current_user_id: int
@@ -30,6 +32,7 @@ class GroupConversationCreate(BaseModel):
 
 class GroupMemberAdd(BaseModel):
     username: str
+
 
 @router.get("/")
 def get_conversations(user_id: int, db: Session = Depends(get_db)):
@@ -87,7 +90,20 @@ def get_conversations(user_id: int, db: Session = Depends(get_db)):
             "type": conv.type,
             "last_message": last_message.content if last_message else "",
             "unread_count": current_member.unread_count if current_member else 0,
+            "last_activity": (
+                last_message.created_at.timestamp()
+                if last_message
+                else 0
+            ),
         })
+
+    result.sort(
+        key=lambda conversation: conversation["last_activity"],
+        reverse=True
+    )
+
+    for conversation in result:
+        conversation.pop("last_activity", None)
 
     return result
 
@@ -126,12 +142,28 @@ def create_direct_conversation(
         member_ids = sorted([member.user_id for member in members])
 
         if member_ids == sorted([payload.current_user_id, target_user.id]):
+            last_message = (
+                db.query(Message)
+                .filter(Message.conversation_id == conv.id)
+                .order_by(Message.created_at.desc())
+                .first()
+            )
+
+            current_member = (
+                db.query(ConversationMember)
+                .filter(
+                    ConversationMember.conversation_id == conv.id,
+                    ConversationMember.user_id == payload.current_user_id
+                )
+                .first()
+            )
+
             return {
                 "id": conv.id,
                 "name": target_user.display_name,
                 "type": conv.type,
-                "last_message": "",
-                "unread_count": 0,
+                "last_message": last_message.content if last_message else "",
+                "unread_count": current_member.unread_count if current_member else 0,
             }
 
     conversation = Conversation(type="direct")
@@ -164,7 +196,6 @@ def create_direct_conversation(
         "last_message": "",
         "unread_count": 0,
     }
-
 
 
 @router.post("/{conversation_id}/read")
@@ -213,10 +244,12 @@ def create_group_conversation(
 
     db.add(admin_member)
 
+    added_user_ids = {payload.current_user_id}
+
     for username in payload.member_usernames:
         user = db.query(User).filter(User.username == username).first()
 
-        if user and user.id != payload.current_user_id:
+        if user and user.id not in added_user_ids:
             member = ConversationMember(
                 conversation_id=conversation.id,
                 user_id=user.id,
@@ -224,6 +257,7 @@ def create_group_conversation(
                 unread_count=0
             )
             db.add(member)
+            added_user_ids.add(user.id)
 
     db.commit()
 
@@ -276,7 +310,7 @@ def add_group_member(
 
     return {"success": True}
 
-    
+
 @router.get("/{conversation_id}/members")
 def get_conversation_members(
     conversation_id: int,
@@ -299,38 +333,6 @@ def get_conversation_members(
         }
         for member, user in members
     ]
-
-
-@router.delete("/{conversation_id}/members/{user_id}")
-def remove_group_member(
-    conversation_id: int,
-    user_id: int,
-    db: Session = Depends(get_db)
-):
-    conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
-
-    if not conversation or conversation.type != "group":
-        return {"error": "Group not found"}
-
-    member = (
-        db.query(ConversationMember)
-        .filter(
-            ConversationMember.conversation_id == conversation_id,
-            ConversationMember.user_id == user_id
-        )
-        .first()
-    )
-
-    if not member:
-        return {"error": "Member not found"}
-
-    if member.role == "admin":
-        return {"error": "Admin cannot be removed"}
-
-    db.delete(member)
-    db.commit()
-
-    return {"success": True}
 
 
 @router.delete("/{conversation_id}/members/{user_id}")
