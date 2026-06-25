@@ -1,55 +1,78 @@
-## Links
-
-GitHub Repository: https://github.com/Sankalp-Sinha/signal-clone
-
-Frontend Deployment: https://signal-clone-7hc2251ps-sankalps-projects-714dd915.vercel.app
-
-Backend Deployment: https://signal-clone-nzop.onrender.com
-
 # Signal Clone
 
-A full-stack real-time messaging application inspired by Signal Messenger, built using Next.js, FastAPI, SQLite, SQLAlchemy, and WebSockets.
+A full-stack clone of the Signal messaging application built using **Next.js**, **FastAPI**, **SQLite**, and **WebSockets**. The application recreates Signal's clean interface and core messaging experience with real-time one-to-one and group conversations.
+
+---
+
+## Live Demo
+
+**Frontend:** https://YOUR-VERCEL-URL.vercel.app
+
+**Backend:** https://YOUR-RENDER-URL.onrender.com
+
+---
+
+## GitHub Repository
+
+https://github.com/YOUR-USERNAME/signal-clone
+
+---
 
 ## Features
 
 ### Authentication
 
-* User Registration
-* Login with Mock OTP Verification
-* Session Persistence using Local Storage
-* Logout Functionality
+* User registration
+* Login / Logout
+* Session persistence
+* Mock authentication
+* User profile with avatar and display name
 
-### Messaging
+---
 
-* One-to-One Conversations
-* Group Conversations
-* Real-Time Messaging using WebSockets
-* Typing Indicators
-* Persistent Message Storage
-* Message Delivery Status
+### Contacts & Conversations
 
-### Contacts
+* Create direct conversations
+* Search conversations
+* Create group chats
+* Conversation list sorted by latest activity
+* Last message preview
+* Unread message indicators
+* Mock online status
 
-* Start New Chat by Username
-* User-Specific Conversation Lists
-* Conversation Search
+---
 
-### Group Features
+### Real-time Messaging
 
-* Group Chat Support
-* Group Information Panel
-* Member List
-* Admin Badge
-* Group Management UI (Add Member, Rename Group, Leave Group)
+* Real-time messaging using WebSockets
+* Message timestamps
+* Typing indicators
+* Delivery status
+* Read receipts
+* Persistent message storage
 
-### UI & UX
+---
 
-* Signal-Inspired Interface
-* Conversation Sidebar
-* Chat View
-* Dark Mode
-* Settings Page
-* Responsive Layout
+### Group Chats
+
+* Create groups
+* View members
+* Add members
+* Remove members
+* Admin-only member management
+* Group information panel
+
+---
+
+### User Experience
+
+* Signal-inspired interface
+* Dark / Light mode
+* Toast notifications
+* Search functionality
+* Responsive desktop layout
+* Settings placeholders
+* Privacy placeholders
 
 ---
 
@@ -57,154 +80,209 @@ A full-stack real-time messaging application inspired by Signal Messenger, built
 
 ### Frontend
 
-* Next.js
-* TypeScript
-* React
+* Next.js (TypeScript)
 * Tailwind CSS
+* React
+* react-hot-toast
 
 ### Backend
 
 * FastAPI
 * SQLAlchemy
-* WebSockets
-* Pydantic
-
-### Database
-
 * SQLite
+* Pydantic
+* Uvicorn
+
+### Real-time
+
+* Native WebSockets
 
 ---
 
-## Architecture
+## Project Structure
 
-```text
-Frontend (Next.js)
-        │
-        │ REST APIs
-        ▼
-Backend (FastAPI)
-        │
-        ▼
-SQLite Database
+```
+signal-clone/
 
-Frontend
-        │
-        │ WebSocket
-        ▼
-Backend WebSocket Server
+├── frontend/
+│   ├── app/
+│   ├── components/
+│   ├── lib/
+│   └── public/
+│
+├── backend/
+│   ├── routers/
+│   ├── schemas/
+│   ├── services/
+│   ├── models.py
+│   ├── database.py
+│   ├── main.py
+│   ├── seed.py
+│   └── signal.db
+│
+└── README.md
 ```
 
 ---
 
-## Database Schema
+# Architecture Overview
 
-### Users
-
-| Field        | Type    |
-| ------------ | ------- |
-| id           | Integer |
-| username     | String  |
-| display_name | String  |
-| phone        | String  |
-| avatar_url   | String  |
-| is_online    | Boolean |
-
-### Conversations
-
-| Field | Type           |
-| ----- | -------------- |
-| id    | Integer        |
-| name  | String         |
-| type  | direct / group |
-
-### Conversation Members
-
-| Field           | Type    |
-| --------------- | ------- |
-| id              | Integer |
-| conversation_id | Integer |
-| user_id         | Integer |
-| role            | String  |
-| unread_count    | Integer |
-
-### Messages
-
-| Field           | Type                    |
-| --------------- | ----------------------- |
-| id              | Integer                 |
-| conversation_id | Integer                 |
-| sender_id       | Integer                 |
-| content         | Text                    |
-| status          | sent / delivered / read |
-| created_at      | DateTime                |
+```
+                 Next.js Frontend
+                        │
+        REST APIs       │       WebSockets
+                        │
+                  FastAPI Backend
+                        │
+                  SQLAlchemy ORM
+                        │
+                    SQLite Database
+```
 
 ---
 
-## API Endpoints
+# Database Schema
 
-### Authentication
+## User
 
-```http
+| Field        | Type     |
+| ------------ | -------- |
+| id           | Integer  |
+| username     | String   |
+| display_name | String   |
+| avatar_url   | String   |
+| phone        | String   |
+| is_online    | Boolean  |
+| last_seen    | DateTime |
+
+---
+
+## Conversation
+
+| Field      | Type           |
+| ---------- | -------------- |
+| id         | Integer        |
+| type       | direct / group |
+| name       | String         |
+| avatar_url | String         |
+| created_at | DateTime       |
+
+---
+
+## ConversationMember
+
+| Field           | Type         |
+| --------------- | ------------ |
+| id              | Integer      |
+| conversation_id | FK           |
+| user_id         | FK           |
+| role            | admin/member |
+| unread_count    | Integer      |
+
+---
+
+## Message
+
+| Field           | Type                       |
+| --------------- | -------------------------- |
+| id              | Integer                    |
+| conversation_id | FK                         |
+| sender_id       | FK                         |
+| content         | String                     |
+| status          | sending / delivered / read |
+| is_read         | Boolean                    |
+| created_at      | DateTime                   |
+
+---
+
+# API Overview
+
+## Authentication
+
+```
 POST /auth/register
 POST /auth/login
-POST /auth/verify-otp
-```
-
-### Conversations
-
-```http
-GET /conversations/?user_id={id}
-POST /conversations/direct
-```
-
-### Messages
-
-```http
-GET /messages/{conversation_id}
-POST /messages/
-```
-
-### WebSocket
-
-```http
-ws://localhost:8000/ws/{conversation_id}
 ```
 
 ---
 
-## Setup Instructions
+## Conversations
 
-### Backend
+```
+GET    /conversations
+POST   /conversations/direct
+POST   /conversations/group
+POST   /conversations/{id}/read
+GET    /conversations/{id}/members
+POST   /conversations/{id}/members
+DELETE /conversations/{id}/members/{user_id}
+```
+
+---
+
+## Messages
+
+```
+GET  /messages/{conversation_id}
+POST /messages/send
+POST /messages/{conversation_id}/typing
+POST /messages/{conversation_id}/read
+```
+
+---
+
+## WebSocket
+
+```
+ws://.../ws/{conversation_id}
+```
+
+Used for:
+
+* Real-time messaging
+* Typing indicators
+* Live message updates
+
+---
+
+# Local Setup
+
+## Clone Repository
+
+```bash
+git clone https://github.com/YOUR-USERNAME/signal-clone.git
+
+cd signal-clone
+```
+
+---
+
+## Backend
 
 ```bash
 cd backend
 
 python -m venv venv
 
+# Windows
 venv\Scripts\activate
 
-pip install fastapi uvicorn sqlalchemy pydantic python-multipart passlib bcrypt websockets
+pip install -r requirements.txt
 
 python seed.py
 
 uvicorn main:app --reload
 ```
 
-Backend:
+Backend runs on:
 
-```text
-http://localhost:8000
 ```
-
-Swagger Docs:
-
-```text
-http://localhost:8000/docs
+http://localhost:8000
 ```
 
 ---
 
-### Frontend
+## Frontend
 
 ```bash
 cd frontend
@@ -214,93 +292,65 @@ npm install
 npm run dev
 ```
 
-Frontend:
+Frontend runs on:
 
-```text
+```
 http://localhost:3000
 ```
 
 ---
 
-## Demo Accounts
+# Environment Variables
 
-### Seeded Users
+## Frontend
 
-```text
-Username: sankalp
-OTP: 123456
+Create a `.env.local`
+
 ```
+NEXT_PUBLIC_API_URL=http://localhost:8000
 
-```text
-Username: alice
-OTP: 123456
+NEXT_PUBLIC_WS_URL=ws://localhost:8000
 ```
-
-```text
-Username: bob
-OTP: 123456
-```
-
-### Register New Users
-
-Users can register new accounts and start conversations using the "+" button.
 
 ---
 
-## Implemented Assignment Features
+## Production
 
-### Completed
+```
+NEXT_PUBLIC_API_URL=<YOUR_RENDER_URL>
 
-* Authentication
-* Contact Discovery by Username
-* Direct Messaging
-* Group Messaging
-* Real-Time Messaging
-* Typing Indicators
-* Conversation Search
-* Dark Mode
-* Settings Page
-* Group Information Panel
-
-### Partially Implemented
-
-* Read Receipts
-* Group Management Actions
-
-### Future Improvements
-
-* File Attachments
-* Message Reactions
-* Pinned Messages
-* Voice Notes
-* Presence Synchronization
-* Push Notifications
-* End-to-End Encryption Simulation
-* Contact Discovery by Phone Number
-* Block Contacts
-* Remove Contacts
+NEXT_PUBLIC_WS_URL=wss://<YOUR_RENDER_URL_WITHOUT_https>
+```
 
 ---
 
-## Screenshots
+# Assumptions
 
-Add screenshots of:
-
-1. Login Page
-2. Register Page
-3. Conversation List
-4. Direct Chat
-5. Group Chat
-6. Group Info Panel
-7. Dark Mode
-8. Settings Page
+* Authentication is mocked.
+* OTP verification is simulated.
+* End-to-end encryption is mocked.
+* Online presence is simulated.
+* SQLite is used as the project database.
+* Voice calls, Stories, and Linked Devices are placeholders as specified in the assignment.
 
 ---
 
-## Author
+# Future Improvements
+
+* File attachments
+* Emoji reactions
+* Reply to messages
+* Voice & Video calls
+* Push notifications
+* End-to-end encryption
+* Mobile-first responsive design
+
+---
+
+# Author
 
 **Sankalp Kumar Sinha**
 
-B.Tech, IIIT Bhagalpur
+IIIT Bhagalpur
 
-Built as part of the Secure Messaging Platform (Signal Clone) Full Stack Assignment.
+B.Tech Computer Science & Engineering
