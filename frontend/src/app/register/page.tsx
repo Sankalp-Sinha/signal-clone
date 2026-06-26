@@ -67,13 +67,18 @@ export default function RegisterPage() {
               {error}
             </p>
           )}
+          {loading && (
+            <p className="text-center text-sm text-gray-500">
+              Starting backend... This may take up to 30 seconds on the first request.
+            </p>
+          )}
 
           <button
             onClick={handleRegister}
             disabled={loading}
             className="w-full rounded-lg bg-blue-500 py-3 font-medium text-white"
           >
-            {loading ? "Creating..." : "Register"}
+            {loading ? "Starting backend..." : "Register"}
           </button>
         </div>
 
